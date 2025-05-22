@@ -14,10 +14,9 @@
                 {% endif %}
             </legend>
             <div class="form-group mb-3">
-                <label for="id_exercise_name"><i class="fa fa-font"></i> Название упражнения</label>
-                <input type="text" name="exercise_name" maxlength="32" class="form-control {% if form.exercise_name.errors %}is-invalid{% endif %}" id="id_exercise_name" placeholder="Например: Приседания" value="{{ form.exercise_name.value|default_if_none:'' }}">
-                <small class="form-text text-muted">Можно использовать русские и латинские буквы, цифры, дефисы и пробелы. До 32 символов.</small>
-                {% for error in form.exercise_name.errors %}
+                <label for="id_exercise_ref"><i class="fa fa-font"></i> Упражнение</label>
+                {{ form.exercise_ref }}
+                {% for error in form.exercise_ref.errors %}
                     <div class="invalid-feedback">{{ error }}</div>
                 {% endfor %}
             </div>

@@ -11,6 +11,8 @@
                     <a class="btn btn-danger btn-nm mb-2 pull-right mr-1" href="{% url 'exlog-delete' exlog.id %}"><i class="fa fa-trash"></i> Удалить</a>
                 {% endif %}
                 <h2 class="mt-1 mb-2">Тренировка {{ exlog.date | date:"d F Y"}}</h2>
+                {% if exlog.duration %}<span class="ml-3"><i class="fa fa-clock"></i> {{ exlog.duration }} мин</span>{% endif %}
+                {% if exlog.note %}<span class="ml-3"><i class="fa fa-sticky-note"></i> {{ exlog.note }}</span>{% endif %}
         </div>
 
         <table class="table table-sm table-bordered card-text">
@@ -27,7 +29,7 @@
                     {% for exercise in exercises%}
                         {% if exercise.exercise_log == exlog %}
                         <tr>
-                            <td>{{ exercise.exercise_name }}</td>
+                            <td>{{ exercise.exercise_ref.name }}</td>
                             <td>
                                 {% if exercise.exercise_weight != 0 %}
                                     {{ exercise.exercise_weight }} кг
@@ -50,7 +52,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="/results?ex={{exercise.exercise_name}}" class="text-primary pr-1"><i class="fa fa-line-chart"></i></a>
+                                <a href="/results?ex={{exercise.exercise_ref.name}}" class="text-primary pr-1"><i class="fa fa-line-chart"></i></a>
                                 <a href="{% url 'exlog-update-exercise' exercise.id %}" class="text-success pr-1"><i class="fa fa-edit"></i></a>
                                 <a href="{% url 'exlog-delete-exercise' exercise.id %}" class="text-danger"><i class="fa fa-trash"></i></a>
                             </td>

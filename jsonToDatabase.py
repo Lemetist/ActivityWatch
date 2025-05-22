@@ -4,7 +4,7 @@
 # Add Exercises from json file to database
 import json
 from app.models import Exercise
-with open('Exercises.json') as f:
+with open('Exercises.json', encoding='utf-8') as f:
     exer_json = json.load(f)
 
 for exe in exer_json:

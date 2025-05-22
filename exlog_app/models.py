@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.validators import RegexValidator
+from app.models import Exercise as ExerciseReference
 
 
 class ExerciseLog(models.Model) :
@@ -16,6 +17,8 @@ class ExerciseLog(models.Model) :
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=timezone.now)
+    duration = models.PositiveIntegerField(null=True, blank=True, verbose_name='Длительность (мин)')
+    note = models.TextField(null=True, blank=True, verbose_name='Заметка')
 
     def __str__(self) :
         """
@@ -33,18 +36,17 @@ class ExerciseLog(models.Model) :
 class Exercise(models.Model) :
     """
     Модель упражнения.
+    Теперь ссылается на справочник Exercise из app.models.
 
     Атрибуты:
         exercise_log (ExerciseLog): Журнал, связанный с упражнением.
-        exercise_name (str): Название упражнения.
+        exercise_ref (ExerciseReference): Справочник упражнения.
         num_sets (int): Количество подходов.
         num_reps (int): Количество повторений.
         exercise_weight (int): Вес для упражнения.
     """
     exercise_log = models.ForeignKey(ExerciseLog, on_delete=models.CASCADE)
-    # Разрешаем кириллицу, латиницу, цифры, дефисы и пробелы
-    alpha_num_dash = RegexValidator(r'^[0-9a-zA-Zа-яА-ЯёЁ\-\s]*$', 'Только буквы, цифры, дефисы и пробелы разрешены.')
-    exercise_name = models.CharField(max_length=32, validators=[alpha_num_dash])
+    exercise_ref = models.ForeignKey(ExerciseReference, on_delete=models.CASCADE, verbose_name='Упражнение')
     num_sets = models.PositiveIntegerField()
     num_reps = models.PositiveIntegerField()
     exercise_weight = models.PositiveIntegerField()
@@ -53,8 +55,7 @@ class Exercise(models.Model) :
         """
         Возвращает строковое представление упражнения.
         """
-        return str(self.exercise_log) + "\t" + str(self.exercise_name) + "\t" + str(self.num_sets) + "x" + str(
-            self.num_reps) + "\t" + str(self.exercise_weight)
+        return f"{self.exercise_log} | {self.exercise_ref.name} | {self.num_sets}x{self.num_reps} {self.exercise_weight}кг"
 
     def get_absolute_url(self) :
         """

@@ -102,6 +102,8 @@
                         {% endif %}
                     {% endfor %}
                     <span><i class="fa fa-dumbbell"></i> Упражнений: {{ ex_count }}</span>
+                    {% if exlog.duration %}<span class="ml-3"><i class="fa fa-clock"></i> {{ exlog.duration }} мин</span>{% endif %}
+                    {% if exlog.note %}<span class="ml-3"><i class="fa fa-sticky-note"></i> {{ exlog.note|truncatechars:40 }}</span>{% endif %}
                 {% endwith %}
             </div>
             <div class="card-text">
@@ -125,7 +127,7 @@
                         {% for exercise in exercises %}
                             {% if exercise.exercise_log == exlog %}
                             <tr {% if exercise.exercise_weight == max_weight and exercise.exercise_weight > 0 %}style="background:#e6ffe6;font-weight:600;" title="Максимальный вес за тренировку"{% endif %}>
-                                <td>{{ exercise.exercise_name }}</td>
+                                <td>{{ exercise.exercise_ref.name }}</td>
                                 <td>{% if exercise.exercise_weight != 0 %}{{ exercise.exercise_weight }} кг{% else %}--{% endif %}</td>
                                 <td>{% if exercise.num_sets != 0 %}{{ exercise.num_sets }}{% else %}--{% endif %}</td>
                                 <td>{% if exercise.num_reps != 0 %}{{ exercise.num_reps }}{% else %}--{% endif %}</td>

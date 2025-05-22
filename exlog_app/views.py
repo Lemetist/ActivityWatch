@@ -41,9 +41,7 @@ def home(request):
 def add_from_recommender(request, exercise_name):
     """
     Добавляет упражнение в журнал за текущий день.
-
-    Если журнала за текущий день нет, создаёт его. Затем добавляет упражнение
-    с нулевыми значениями подходов, повторений и веса.
+    Теперь ищет упражнение в справочнике и добавляет ссылку на него.
 
     Аргументы:
         request: HTTP-запрос.
@@ -52,6 +50,7 @@ def add_from_recommender(request, exercise_name):
     Возвращает:
         Перенаправление на предыдущую страницу.
     """
+    from app.models import Exercise as ExerciseReference
     today_log = None
     try:
         exlog_count = ExerciseLog.objects.filter(user=request.user.id, date=datetime.date.today()).count()
@@ -65,15 +64,22 @@ def add_from_recommender(request, exercise_name):
     except Exception as e:
         print('ERROR', e)
 
+    # Найти упражнение в справочнике
+    try:
+        exercise_ref = ExerciseReference.objects.get(name=exercise_name)
+    except ExerciseReference.DoesNotExist:
+        messages.error(request, f"Упражнение '{exercise_name}' не найдено в справочнике!", extra_tags='danger')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
     Exercise.objects.create(
         exercise_log=today_log,
-        exercise_name=exercise_name,
+        exercise_ref=exercise_ref,
         num_sets=0,
         num_reps=0,
         exercise_weight=0,
     )
 
-    messages.success(request, "Упражнение успешно добавлено в сегодняшний журнал тренировок!!", extra_tags='success')
+    messages.success(request, "Упражнение успешно добавлено в сегодняшний журнал тренировок!", extra_tags='success')
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 class ExlogDetailView(DetailView):
@@ -113,7 +119,7 @@ class ExlogCreateView(LoginRequiredMixin, CreateView):
         fields: Поля, отображаемые в форме.
     """
     model = ExerciseLog
-    fields = ['date']
+    fields = ['date', 'duration', 'note']
 
     def get_form(self):
         """
@@ -149,7 +155,7 @@ class ExlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         fields: Поля, отображаемые в форме.
     """
     model = ExerciseLog
-    fields = ['date']
+    fields = ['date', 'duration', 'note']
 
     def get_form(self):
         """
@@ -218,13 +224,10 @@ class ExlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class ExerciseCreateView(LoginRequiredMixin, CreateView):
     """
     Представление для добавления нового упражнения в журнал.
-
-    Атрибуты:
-        model: Модель, связанная с представлением.
-        fields: Поля, отображаемые в форме.
+    Теперь использует справочник упражнений (exercise_ref).
     """
     model = Exercise
-    fields = ['exercise_name', 'num_sets', 'num_reps', 'exercise_weight']
+    fields = ['exercise_ref', 'num_sets', 'num_reps', 'exercise_weight']
 
     def form_valid(self, form):
         """
@@ -240,9 +243,10 @@ class ExerciseCreateView(LoginRequiredMixin, CreateView):
 class ExerciseUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
     Представление для обновления существующего упражнения.
+    Теперь использует справочник упражнений (exercise_ref).
     """
     model = Exercise
-    fields = ['exercise_name', 'num_sets', 'num_reps', 'exercise_weight']
+    fields = ['exercise_ref', 'num_sets', 'num_reps', 'exercise_weight']
 
     def form_valid(self, form):
         messages.success(self.request, "Упражнение успешно обновлено!", extra_tags='success')

@@ -277,7 +277,7 @@ def results(request):
         ex_names = []
         for i in ExerciseLog.objects.filter(user=request.user):
             for j in Exercise_App.objects.filter(exercise_log=i):
-                ex_names.append(j.exercise_name)
+                ex_names.append(j.exercise_ref.name)
 
         weights = []
         reps = []
@@ -285,7 +285,7 @@ def results(request):
         rep_max = []
         for i in ExerciseLog.objects.filter(user=request.user).order_by('date'):
             for j in Exercise_App.objects.filter(exercise_log=i):
-                if j.exercise_name == request.GET.get('ex', ''):
+                if j.exercise_ref.name == request.GET.get('ex', ''):
                     weights.append(j.exercise_weight)
                     reps.append(j.num_reps)
                     dates.append(i.date)
@@ -392,7 +392,7 @@ def export_data_csv(request):
     # Упражнения
     for log in ExerciseLog.objects.filter(user=request.user):
         for ex in Exercise_App.objects.filter(exercise_log=log):
-            writer.writerow(['Упражнение', log.date, ex.exercise_name, ex.exercise_weight, ''])
+            writer.writerow(['Упражнение', log.date, ex.exercise_ref.name, ex.exercise_weight, ''])
     return response
 
 @login_required
