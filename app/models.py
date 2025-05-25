@@ -9,9 +9,9 @@ from django.core.validators import RegexValidator
 class Exercise(models.Model):
     name = models.CharField(max_length=100)
     group = models.CharField(max_length=100)
-    group_code = models.IntegerField()
+    group_code = models.IntegerField(null=True, blank=True, default=0)  # Сделано необязательным
     description = models.TextField()
-    image_link = models.TextField()
+    image_link = models.ImageField(upload_to='exerciseImages/', null=True, blank=True)  # Поле для загрузки изображений
     ex_id = models.IntegerField()
 
     def __str__(self):
