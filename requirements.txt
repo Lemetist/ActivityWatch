@@ -1,3 +1,3 @@
 django
-matplotlib
+plotly
 python-decouple
