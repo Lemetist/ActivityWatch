@@ -17,6 +17,13 @@ class Exercise(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.ex_id:
+            # Автоматическое назначение ex_id, если оно не задано
+            max_ex_id = Exercise.objects.aggregate(models.Max('ex_id'))['ex_id__max']
+            self.ex_id = (max_ex_id or 0) + 1
+        super().save(*args, **kwargs)
+
 
 class WeightLog(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)

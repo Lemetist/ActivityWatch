@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as django_views
 from . import views, forms
+from .views import force_500, force_400
 
 
 app_name = 'app'
@@ -16,5 +17,7 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout'),
     path('signup/', views.signup, name='signup'),
     path('export/csv/', views.export_data_csv, name='export_csv'),
-    path('export/json/', views.export_data_json, name='export_json')
+    path('export/json/', views.export_data_json, name='export_json'),
+    path('force-500/', force_500, name='force_500'),
+    path('force-400/', force_400, name='force_400'),
 ]

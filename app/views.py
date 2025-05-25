@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from datetime import date, datetime, timedelta
 from django.contrib.auth import logout
 from django.contrib import messages
@@ -410,3 +410,19 @@ def export_data_json(request):
     response = HttpResponse(json.dumps(data, ensure_ascii=False, default=str), content_type='application/json')
     response['Content-Disposition'] = 'attachment; filename="fittrack_data.json"'
     return response
+
+def error_400(request, exception):
+    """Обработчик ошибки 400."""
+    return render(request, 'app/400.html', status=400)
+
+def error_500(request):
+    """Обработчик ошибки 500."""
+    return render(request, 'app/500.html', status=500)
+
+def force_500(request):
+    """Временное представление для тестирования ошибки 500."""
+    return HttpResponseServerError("Искусственно вызванная ошибка 500.")
+
+def force_400(request):
+    """Временное представление для тестирования ошибки 400."""
+    return HttpResponseBadRequest("Искусственно вызванная ошибка 400.")
