@@ -1,16 +1,11 @@
 {% extends "app/base.html" %}
 {% block style %}
-    .results-graph-img {
+    .results-graph {
         width: 100%;
+        min-height: 320px;
         border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(25,135,84,0.10), 0 1.5px 8px rgba(0,0,0,0.06);
         background: #f8f9fa;
-        padding: 12px 8px 8px 8px;
         margin-bottom: 8px;
-        transition: box-shadow 0.2s;
-    }
-    .results-graph-img:hover {
-        box-shadow: 0 8px 32px rgba(25,135,84,0.18), 0 2px 12px rgba(0,0,0,0.10);
     }
     .results-metric {
         display: flex;
@@ -65,7 +60,7 @@
 {% endblock style %}
 {% block body %}
     <h1>Ваши результаты</h1>
-    <p class="text-muted">Анализируйте прогресс по весу, питанию и силе упражнений.</p>
+    <p class="text-muted">Анализируйте прогресс по весу и питанию. График "Средний вес по дням" — полезная альтернатива динамике силы.</p>
     <hr>
     <div class="mb-4">
         <a href="{% url 'app:export_csv' %}">
@@ -85,17 +80,17 @@
             </div>
         </div>
         <div class="col-6 col-md-4">
-            <div class="results-metric" title="Изменение силы по выбранному упражнению">
-                <span class="icon" data-toggle="tooltip" title="Изменение силы по выбранному упражнению"><i class="fa fa-bolt"></i></span>
-                <span class="results-metric-value">{{ str_change }} <span class="small">%</span></span>
-                <span class="results-metric-label">Изменение силы</span>
-                <span class="desc">{% if not request.GET.ex %}<span class="text-danger">Упражнение не выбрано</span>{% else %}Относительно первого значения{% endif %}</span>
+            <div class="results-metric" title="Средний вес по дням">
+                <span class="icon" data-toggle="tooltip" title="Средний вес по дням"><i class="fa fa-balance-scale"></i></span>
+                <span class="results-metric-value">{% if avg_weight_values %}{{ avg_weight_values|last|floatformat:2 }}{% else %}--{% endif %} <span class="small">кг</span></span>
+                <span class="results-metric-label">Средний вес (последний день)</span>
+                <span class="desc">Среднее значение за последний день с записью</span>
             </div>
         </div>
         <div class="col-12 col-md-4">
             <div class="results-metric" title="Среднее дневное потребление калорий">
                 <span class="icon" data-toggle="tooltip" title="Среднее дневное потребление калорий"><i class="fa fa-cutlery"></i></span>
-                <span class="results-metric-value">{{ avg_cals }} <span class="small">ккал</span></span>
+                <span class="results-metric-value">{{ avg_cals|floatformat:2 }} <span class="small">ккал</span></span>
                 <span class="results-metric-label">Среднее потребление</span>
                 <span class="desc">По всем дням с записями</span>
             </div>
@@ -105,27 +100,12 @@
         <div class="col-12 col-md-6 mb-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <form action="/results/" class="results-form">
-                        <select name="ex" id="ex" class="form-control">
-                            <option value="" {% if not request.GET.ex %}selected{% endif %} disabled>Выберите упражнение</option>
-                            {% for name in ex_names %}
-                                <option value="{{ name }}" {% if name == request.GET.ex %} selected {% endif %}>{{ name }}</option>
-                            {% endfor %}
-                        </select>
-                        <Button class="btn btn-outline-secondary" type="submit">Показать</Button>
-                    </form>
                     <h4 class="results-metric-title">
-                        <i class="fa fa-dumbbell"></i> Динамика силы{% if request.GET.ex %} ({{ request.GET.ex }}){% endif %}
+                        <i class="fa fa-balance-scale"></i> Средний вес по дням
                     </h4>
-                    {% if img3 and request.GET.ex %}
-                        <img style="padding-top:2%" src="data:image/png;base64,{{ img3 }}" class="results-graph-img" alt="График силы">
-                        <div class="text-muted small mt-2" style="text-align:center;">
-                            <i class="fa fa-info-circle"></i> Отслеживайте прогресс по выбранному упражнению
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info mt-3">Нет данных для выбранного упражнения.
-                            <a href="{% url 'exlog-add-exercise' 1 %}" class="btn btn-outline-success btn-sm ml-2">Добавить упражнение</a>
-                        </div>
+                    <div id="avg-weight-plot" class="results-graph"></div>
+                    {% if not avg_weight_labels or not avg_weight_values %}
+                        <div class="alert alert-info mt-3">Нет данных для построения графика среднего веса.</div>
                     {% endif %}
                 </div>
             </div>
@@ -136,19 +116,16 @@
                     <h4 class="card-title mb-3">
                         <i class="fa fa-fire"></i> Ежедневное потребление калорий
                     </h4>
-                    {% if img2 %}
-                        <img src="data:image/png;base64,{{ img2 }}" class="results-graph-img" alt="График калорий">
-                        <div class="text-muted small mt-2" style="text-align:center;">
-                            <i class="fa fa-info-circle"></i> Анализируйте калорийность для достижения целей питания
+                    <div id="calories-plot" class="results-graph"></div>
+                    {% if not cal_labels or not cal_values %}
+                        <div class="alert alert-info mt-3">Нет данных по калориям.
+                            <a href="{% url 'exlog-add-exercise' 1 %}" class="btn btn-outline-success btn-sm ml-2">Добавить питание</a>
                         </div>
+                    {% else %}
                         <div class="row mt-2 text-center">
                             <div class="col-4"><span class="fw-bold">Мин:</span> {{ min_cals }} ккал</div>
                             <div class="col-4"><span class="fw-bold">Макс:</span> {{ max_cals }} ккал</div>
-                            <div class="col-4"><span class="fw-bold">Среднее:</span> {{ avg_cals }} ккал</div>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info mt-3">Нет данных по калориям.
-                            <a href="{% url 'exlog-add-exercise' 1 %}" class="btn btn-outline-success btn-sm ml-2">Добавить питание</a>
+                            <div class="col-4"><span class="fw-bold">Среднее:</span> {{ avg_cals|floatformat:2 }} ккал</div>
                         </div>
                     {% endif %}
                 </div>
@@ -160,30 +137,116 @@
             <div class="card h-100">
                 <div class="card-body">
                     <h4 class="card-title mb-3">
+                        <i class="fa fa-dumbbell"></i> Суммарный поднятый вес по дням
+                    </h4>
+                    <div id="lifted-plot" class="results-graph"></div>
+                    {% if not lifted_labels or not lifted_values %}
+                        <div class="alert alert-info mt-3">Нет данных по упражнениям для построения графика.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">
                         <i class="fa fa-weight"></i> История веса
                     </h4>
-                    {% if img1 %}
-                        <img src="data:image/png;base64,{{ img1 }}" class="results-graph-img" alt="График веса">
-                        <div class="text-muted small mt-2" style="text-align:center;">
-                            <i class="fa fa-info-circle"></i> Следите за динамикой веса для лучшего контроля прогресса
+                    <div id="weight-plot" class="results-graph"></div>
+                    {% if not weight_labels or not weight_values %}
+                        <div class="alert alert-info mt-3">Нет данных по весу.
+                            <a href="{% url 'exlog-add-exercise' 1 %}" class="btn btn-outline-success btn-sm ml-2">Добавить взвешивание</a>
                         </div>
+                    {% else %}
                         <div class="row mt-2 text-center">
                             <div class="col-4"><span class="fw-bold">Мин:</span> {{ min_weight }} кг</div>
                             <div class="col-4"><span class="fw-bold">Макс:</span> {{ max_weight }} кг</div>
                             <div class="col-4"><span class="fw-bold">Среднее:</span> {{ average }} кг</div>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info mt-3">Нет данных по весу.
-                            <a href="{% url 'exlog-add-exercise' 1 %}" class="btn btn-outline-success btn-sm ml-2">Добавить взвешивание</a>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
+        // График веса
+        const weightLabels = {{ weight_labels|safe }};
+        const weightValues = {{ weight_values|safe }};
+        if (weightLabels.length && weightValues.length) {
+            Plotly.newPlot('weight-plot', [{
+                x: weightLabels,
+                y: weightValues,
+                mode: 'lines+markers',
+                marker: {color: '#198754'},
+                line: {color: '#198754'},
+                fill: 'tozeroy',
+                name: 'Вес (кг)'
+            }], {
+                margin: {t: 30},
+                yaxis: {title: 'Вес (кг)'},
+                xaxis: {title: 'Дата'},
+                plot_bgcolor: '#f8f9fa',
+                paper_bgcolor: '#f8f9fa',
+            }, {responsive: true});
+        }
+        // График среднего веса по дням
+        const avgWeightLabels = {{ avg_weight_labels|safe }};
+        const avgWeightValues = {{ avg_weight_values|safe }};
+        if (avgWeightLabels.length && avgWeightValues.length) {
+            Plotly.newPlot('avg-weight-plot', [{
+                x: avgWeightLabels,
+                y: avgWeightValues,
+                mode: 'lines+markers',
+                marker: {color: '#0d6efd'},
+                line: {color: '#0d6efd'},
+                fill: 'tozeroy',
+                name: 'Средний вес (кг)'
+            }], {
+                margin: {t: 30},
+                yaxis: {title: 'Средний вес (кг)'},
+                xaxis: {title: 'Дата'},
+                plot_bgcolor: '#f8f9fa',
+                paper_bgcolor: '#f8f9fa',
+            }, {responsive: true});
+        }
+        // График калорий
+        const calLabels = {{ cal_labels|safe }};
+        const calValues = {{ cal_values|safe }};
+        if (calLabels.length && calValues.length) {
+            Plotly.newPlot('calories-plot', [{
+                x: calLabels,
+                y: calValues,
+                mode: 'lines+markers',
+                marker: {color: '#fd7e14'},
+                line: {color: '#fd7e14'},
+                fill: 'tozeroy',
+                name: 'Калории'
+            }], {
+                margin: {t: 30},
+                yaxis: {title: 'Калории'},
+                xaxis: {title: 'Дата'},
+                plot_bgcolor: '#f8f9fa',
+                paper_bgcolor: '#f8f9fa',
+            }, {responsive: true});
+        }
+        // График суммарного поднятого веса по дням
+        const liftedLabels = {{ lifted_labels|safe }};
+        const liftedValues = {{ lifted_values|safe }};
+        if (liftedLabels.length && liftedValues.length) {
+            Plotly.newPlot('lifted-plot', [{
+                x: liftedLabels,
+                y: liftedValues,
+                type: 'bar',
+                marker: {color: '#fd7e14'},
+                name: 'Суммарный вес'
+            }], {
+                margin: {t: 30},
+                yaxis: {title: 'Поднятый вес (кг)'},
+                xaxis: {title: 'Дата'},
+                plot_bgcolor: '#f8f9fa',
+                paper_bgcolor: '#f8f9fa',
+            }, {responsive: true});
+        }
     </script>
 {% endblock body %}
