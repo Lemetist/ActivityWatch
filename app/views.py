@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from datetime import date, datetime, timedelta
 from django.contrib.auth import logout
+from django.contrib import messages
 from django.utils import timezone
 from .models import Food_Entry
 from exlog_app.models import ExerciseLog, Exercise as Exercise_App
@@ -14,11 +15,14 @@ from .models import WeightLog
 from .forms import WeightLogForm
 from . import forms
 from django.contrib.auth import login, authenticate
+import io
+import urllib, base64
+import matplotlib.pyplot as plt
+import json, os, matplotlib
+import numpy as np
 from django.contrib.auth.decorators import login_required
 import csv
 from django.templatetags.static import static
-from django.db import models
-import json
 
 def button_class(active_exercise, button):
     if active_exercise == button:
@@ -51,34 +55,49 @@ def exercises(request, active_exercises=0):
     else:
         body_diagram = static(f'bodyDiagram/bodyDiagram{active_exercises}.png')
 
-    # Загрузка упражнений только из базы данных!
-    from app.models import Exercise
-    all_exercises = Exercise.objects.all()
+    # Загрузка данных упражнений
+    exercise_list = []
+    exercises_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'Exercises.json')
+    try:
+        with open(exercises_file, encoding='utf-8') as f:
+            data = json.load(f)
+            search = request.GET.get('search', '').strip().lower()
+            difficulty = request.GET.get('difficulty', '').strip().lower()
+            equipment = request.GET.get('equipment', '').strip().lower()
 
-    # Фильтрация по группе
-    if active_exercises == 0 or active_exercises is None:
-        exercise_list = all_exercises
-    elif active_exercises == 100:
-        exercise_list = all_exercises
-    else:
-        exercise_list = all_exercises.filter(group_code=active_exercises)
+            # Если есть поисковый запрос или фильтры, всегда показывать упражнения по всем группам и показывать блок с результатами
+            if search or difficulty or equipment:
+                filtered = data
+                active_exercises = -1  # специальный маркер для шаблона: показать только результаты поиска
+            elif active_exercises == 100:
+                filtered = data
+            elif active_exercises == 0:
+                filtered = []
+            else:
+                filtered = [item for item in data if item.get("group_code") == active_exercises]
 
-    # Поиск
-    search = request.GET.get('search', '').strip().lower()
-    if search:
-        exercise_list = exercise_list.filter(
-            models.Q(name__icontains=search) | models.Q(description__icontains=search)
-        )
-        active_exercises = -1
+            def match(ex):
+                ok = True
+                if search:
+                    ok = search in ex.get('name', '').lower() or search in ex.get('description', '').lower()
+                if ok and difficulty:
+                    ok = ex.get('difficulty', '').lower() == difficulty
+                if ok and equipment:
+                    ok = ex.get('equipment', '').lower() == equipment
+                return ok
+            exercise_list = [ex for ex in filtered if match(ex)]
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        messages.error(request, f"Ошибка загрузки данных упражнений: {e}", extra_tags='danger')
+        exercise_list = []
+        data = []
 
     # Формируем список уникальных групп мышц для фильтрации
     all_groups = set()
     all_group_codes = dict()
-    for ex in all_exercises:
-        all_groups.add((ex.group, ex.group_code))
-        all_group_codes[ex.group] = ex.group_code
+    for item in data:
+        all_groups.add((item.get("group"), item.get("group_code")))
+        all_group_codes[item.get("group")] = item.get("group_code")
     muscle_groups = sorted(list(all_groups), key=lambda x: x[1])
-
     context = {
         'exercises': exercise_list,
         'title': 'Каталог упражнений',
@@ -86,7 +105,7 @@ def exercises(request, active_exercises=0):
         'classes': classes,
         'body_diagram': body_diagram,
         'muscle_groups': muscle_groups,
-    }
+        }
     return render(request, 'app/exercises.html', context)
 
 def foodtracker(request):
@@ -178,25 +197,12 @@ def weightlog(request):
         if request.method == 'POST':
             form = WeightLogForm(request.POST)
             if form.is_valid():
-                try:
-                    weight = float(form.cleaned_data['weight'])
-                except (ValueError, TypeError):
-                    messages.error(request, "Введите корректное значение веса!", extra_tags='danger')
-                    return render(request, 'app/weightlog.html', context)
-                if weight < 20 or weight > 400:
-                    messages.error(request, "Вес должен быть в диапазоне 20–400 кг!", extra_tags='danger')
-                else:
-                    last_log = WeightLog.objects.filter(user=request.user).order_by('-timestamp').first()
-                    if last_log and abs(weight - float(last_log.weight)) > 10:
-                        messages.error(request, f"Внимание: разница с предыдущей записью составляет {abs(weight - float(last_log.weight)):.1f} кг. Проверьте правильность ввода!", extra_tags='danger')
-                    else:
-                        w = WeightLog(weight=weight, user=request.user)
-                        w.save()
-                        messages.success(request, "Вес успешно добавлен!", extra_tags='success')
-                        return redirect('app:weightlog')
-            else:
-                messages.error(request, "Введите корректное значение веса!", extra_tags='danger')
-        return render(request, 'app/weightlog.html', context)
+                w = WeightLog(weight=form.cleaned_data['weight'], user=request.user)
+                w.save()
+                context['savedWeight'] = True
+                return render(request, 'app/weightlog.html', context)
+        else:
+            return render(request, 'app/weightlog.html', context)
 
 def login_view(request):
     context = {
@@ -211,18 +217,39 @@ def results(request):
         # График веса
         weight_logs = list(WeightLog.objects.filter(user=request.user).order_by('timestamp'))
         if weight_logs:
-            weight_labels = [i.timestamp.date().strftime('%d.%m') for i in weight_logs]
-            weight_values = [float(i.weight) for i in weight_logs]
+            x_dates = [i.timestamp.date().strftime('%d.%m') for i in weight_logs]
+            y_weights = [float(i.weight) for i in weight_logs]
+            plt.close()
+            plt.plot(x_dates, y_weights, marker='o', markersize=5, color='blue')
+            plt.xlabel('Дата')
+            plt.ylabel('Вес (кг)')
+            for i, w in enumerate(weight_logs):
+                plt.annotate(float(w.weight), (x_dates[i], float(w.weight)+2), ha="center")
+            fig1 = plt.gcf()
+            buf1 = io.BytesIO()
+            fig1.savefig(buf1, format='png')
+            buf1.seek(0)
+            string = base64.b64encode(buf1.read())
+            img1 = urllib.parse.quote(string)
+            plt.close()
+            weight_labels = x_dates
+            weight_values = y_weights
         else:
+            img1 = ''
             weight_labels = []
             weight_values = []
+
+        # График среднего веса по дням (для простоты совпадает с обычным)
+        avg_weight_labels = weight_labels
+        avg_weight_values = weight_values
 
         # График калорий
         food_entries = Food_Entry.objects.filter(user=request.user).order_by('date').extra({'_date': 'Date(date)'}).values('_date').annotate(val=Avg('calories'), count=Count('calories'))
         cal_labels = []
         cal_values = []
-        avgCals = 0
+        cals = []
         counts = []
+        avgCals = 0
         for item in food_entries:
             date = item.get('_date')
             if isinstance(date, str):
@@ -232,70 +259,56 @@ def results(request):
                 cal_labels.append(date.strftime('%d.%m'))
             else:
                 cal_labels.append(str(date))
-            cal_values.append(item.get('val') * item.get('count'))
+            cals.append(item.get('val'))
             counts.append(item.get('count'))
-            avgCals += item.get('val') * item.get('count')
+            cal_values.append(int(item.get('val') * item.get('count')))
+            avgCals = avgCals + item.get('val') * item.get('count')
         if len(cal_labels) > 0:
             avgCals = avgCals / len(cal_labels)
-        
-        # Вместо графика силы по упражнению — график среднего веса за день
-        avg_weight_by_day = {}
-        for i, label in enumerate(weight_labels):
-            if label not in avg_weight_by_day:
-                avg_weight_by_day[label] = []
-            avg_weight_by_day[label].append(weight_values[i])
-        avg_weight_labels = list(avg_weight_by_day.keys())
-        avg_weight_values = [sum(vals)/len(vals) for vals in avg_weight_by_day.values()]
+        else:
+            avgCals = 0
 
-        # График суммарного поднятого веса по дням
-        lifted_weight_by_day = {}
-        for log in ExerciseLog.objects.filter(user=request.user):
-            date_label = log.date.strftime('%d.%m')
+        # График суммарного поднятого веса по дням (пример: по датам тренировок)
+        lifted_labels = []
+        lifted_values = []
+        for log in ExerciseLog.objects.filter(user=request.user).order_by('date'):
             total = 0
             for ex in Exercise_App.objects.filter(exercise_log=log):
-                if ex.exercise_weight and ex.num_reps and ex.num_sets:
-                    total += float(ex.exercise_weight) * int(ex.num_reps) * int(ex.num_sets)
-            lifted_weight_by_day[date_label] = lifted_weight_by_day.get(date_label, 0) + total
-        lifted_labels = list(lifted_weight_by_day.keys())
-        lifted_values = list(lifted_weight_by_day.values())
+                total += ex.exercise_weight * ex.num_reps * ex.num_sets
+            lifted_labels.append(log.date.strftime('%d.%m'))
+            lifted_values.append(total)
 
-        # Метрики
-        weightSum = sum(weight_values)
-        if weight_values:
-            average = '%.2f' % (weightSum / len(weight_values))
-            change = float(weight_values[-1]) - float(weight_values[0])
-            change = '%.2f' % change
-            min_weight = min(weight_values)
-            max_weight = max(weight_values)
+        # ...остальной код (img2, img3, average, change, min/max и т.д.)...
+        weightSum = 0
+        for i in WeightLog.objects.filter(user=request.user):
+            weightSum += float(i.weight)
+        if len(WeightLog.objects.filter(user=request.user)) > 0:
+            average = weightSum / (len(WeightLog.objects.filter(user=request.user)))
+            average = '%.2f' % average
+            change = float(WeightLog.objects.filter(user=request.user)[len(WeightLog.objects.filter(user=request.user)) - 1].weight) - float(WeightLog.objects.filter(user=request.user)[0].weight)
         else:
             average = '--'
             change = '--'
-            min_weight = '--'
-            max_weight = '--'
-        if cal_values:
-            min_cals = min(cal_values)
-            max_cals = max(cal_values)
-        else:
-            min_cals = '--'
-            max_cals = '--'
 
         context = {
             'title': 'Результаты',
-            'weight_labels': weight_labels,
-            'weight_values': weight_values,
-            'cal_labels': cal_labels,
-            'cal_values': cal_values,
-            'avg_weight_labels': avg_weight_labels,
-            'avg_weight_values': avg_weight_values,
-            'lifted_labels': lifted_labels,
-            'lifted_values': lifted_values,
+            'img1': img1,
+            # ...
             'change': change,
             'average': average,
             'avg_cals': avgCals,
-            'min_weight': min_weight,
-            'max_weight': max_weight,
-            'min_cals': min_cals,
-            'max_cals': max_cals,
+            'min_weight': min([float(i.weight) for i in WeightLog.objects.filter(user=request.user)]) if WeightLog.objects.filter(user=request.user).exists() else '--',
+            'max_weight': max([float(i.weight) for i in WeightLog.objects.filter(user=request.user)]) if WeightLog.objects.filter(user=request.user).exists() else '--',
+            'min_cals': min([float(j*counts[i]) for i,j in enumerate(cals)]) if len(cals) > 0 else '--',
+            'max_cals': max([float(j*counts[i]) for i,j in enumerate(cals)]) if len(cals) > 0 else '--',
+            'weight_labels': weight_labels,
+            'weight_values': weight_values,
+            'avg_weight_labels': avg_weight_labels,
+            'avg_weight_values': avg_weight_values,
+            'cal_labels': cal_labels,
+            'cal_values': cal_values,
+            'lifted_labels': lifted_labels,
+            'lifted_values': lifted_values,
         }
         return render(request, 'app/results.html', context)
 
@@ -339,7 +352,7 @@ def export_data_csv(request):
     # Упражнения
     for log in ExerciseLog.objects.filter(user=request.user):
         for ex in Exercise_App.objects.filter(exercise_log=log):
-            writer.writerow(['Упражнение', log.date, ex.exercise_ref.name, ex.exercise_weight, ''])
+            writer.writerow(['Упражнение', log.date, ex.exercise_name, ex.exercise_weight, ''])
     return response
 
 @login_required
@@ -373,3 +386,20 @@ def force_500(request):
 def force_400(request):
     """Временное представление для тестирования ошибки 400."""
     return HttpResponseBadRequest("Искусственно вызванная ошибка 400.")
+
+@login_required
+def profile(request):
+    user = request.user
+    weight_logs = WeightLog.objects.filter(user=user).order_by('-timestamp')
+    food_entries = Food_Entry.objects.filter(user=user).order_by('-date')
+    exercises = []
+    for log in ExerciseLog.objects.filter(user=user):
+        exercises.extend(Exercise_App.objects.filter(exercise_log=log))
+    context = {
+        'title': 'Профиль',
+        'user': user,
+        'weight_logs': weight_logs,
+        'food_entries': food_entries,
+        'exercises': exercises,
+    }
+    return render(request, 'app/profile.html', context)

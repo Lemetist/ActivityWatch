@@ -1,0 +1,70 @@
+{% extends "app/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-2 text-center mb-3 mb-md-0">
+            <img src="{% static 'user.png' %}" alt="avatar" class="rounded-circle shadow" style="width: 90px; height: 90px; object-fit:cover;">
+        </div>
+        <div class="col-md-7">
+            <h2 class="mb-1">{{ user.username }}</h2>
+            <p class="mb-1"><b>Email:</b> {{ user.email }}</p>
+            <p class="mb-1"><b>Дата регистрации:</b> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+        </div>
+        <div class="col-md-3 text-md-right text-center">
+            <a href="{% url 'app:weightlog' %}" class="btn btn-outline-success mb-2 w-100"><i class="fa fa-balance-scale"></i> Добавить вес</a>
+            <a href="{% url 'app:foodtracker' %}" class="btn btn-outline-warning mb-2 w-100"><i class="fa fa-cutlery"></i> Добавить еду</a>
+            <a href="{% url 'exlog-create' %}" class="btn btn-outline-primary w-100"><i class="fa fa-plus"></i> Новая тренировка</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white"><i class="fa fa-balance-scale"></i> Журнал веса <span class="badge badge-light ml-2">{{ weight_count }}</span></div>
+                <ul class="list-group list-group-flush">
+                    {% for log in weight_logs %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ log.timestamp|date:"d.m.Y H:i" }}</span>
+                            <span class="badge badge-success badge-pill" style="font-size:1em;">{{ log.weight }} кг</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет записей</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark"><i class="fa fa-cutlery"></i> Питание <span class="badge badge-light ml-2">{{ food_count }}</span></div>
+                <ul class="list-group list-group-flush">
+                    {% for entry in food_entries %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ entry.date|date:"d.m.Y" }} — {{ entry.description }}</span>
+                            <span class="badge badge-warning badge-pill" style="font-size:1em; color:#222;">{{ entry.calories }} ккал</span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">Нет записей</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white"><i class="fa fa-dumbbell"></i> Упражнения <span class="badge badge-light ml-2">{{ exercise_count }}</span></div>
+        <ul class="list-group list-group-flush">
+            {% for ex in exercises %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ ex.exercise_ref.name }} — {{ ex.num_sets }}x{{ ex.num_reps }}</span>
+                    <span class="badge badge-primary badge-pill" style="font-size:1em;">{{ ex.exercise_weight }} кг</span>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">Нет упражнений</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="text-center mb-4">
+        <a href="{% url 'app:results' %}" class="btn btn-outline-info mx-2"><i class="fa fa-line-chart"></i> Смотреть аналитику</a>
+        <a href="{% url 'exlog_home' %}" class="btn btn-outline-secondary mx-2"><i class="fa fa-list"></i> Все тренировки</a>
+    </div>
+</div>
+{% endblock %}

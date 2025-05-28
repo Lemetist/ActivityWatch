@@ -75,7 +75,9 @@
             </div>
             {% with request.resolver_match.url_name as url_name %}
             {% if user.is_authenticated %}
-                <p class="nav-btn pt-2">{{ user.username }}</p>
+                <a href="{% url 'app:profile' %}" class="nav-btn pt-2" style="text-decoration:none; color:inherit;">
+                    {{ user.username }}
+                </a>
                 <a href={% url 'app:logout' %}>
                     <Button class="btn btn-outline-danger nav-btn">Выйти</Button>
                 </a>
@@ -111,6 +113,19 @@
         </a>
     </div>
     <div class="container" style="min-height:600px;">
+        {% if breadcrumbs %}
+        <nav aria-label="breadcrumb" class="mt-2 mb-3">
+            <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
+                {% for crumb in breadcrumbs %}
+                    {% if not forloop.last %}
+                        <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+                    {% else %}
+                        <li class="breadcrumb-item active" aria-current="page">{{ crumb.title }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+        {% endif %}
         {% block body %}{% endblock %}
     </div>
     <footer class="footer">
