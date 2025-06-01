@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" version="27.1.1">
+  <diagram name="Страница — 1" id="445BrM8I82jTkb1T3q7r">
+    <mxGraphModel dx="1959" dy="884" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="IEytvggkquGmuHUVMgxF-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="430" y="290" width="930" height="758" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-2" value="Логотип" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="430" y="291.75" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-11" value="© 2025 Active Life, Inc. Все права защищены." style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="570" y="978" width="700" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-12" value="Описание" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="600" y="448" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-13" value="Записать" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="1090" y="443" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-14" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="600" y="568" width="440" height="345" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-15" value="Описание" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="630" y="588" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-16" value="Калории" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="875" y="588" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-17" value="Калории" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="770" y="448" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="IEytvggkquGmuHUVMgxF-18" value="Дата" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="930" y="448" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-8" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="320" width="700" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-9" value="Главная" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="580" y="330" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-10" value="Упражнения" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="670" y="330" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-11" value="Журнал тренировок" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="770" y="330" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-12" value="Весовой журнал" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="920" y="328.13" width="110" height="33.75" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-13" value="Трекер питания" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="323.75" width="90" height="42.5" as="geometry" />
+        </mxCell>
+        <mxCell id="0F8iX0dF4o5qEnWF5QVM-14" value="Результаты" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="330.01" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
