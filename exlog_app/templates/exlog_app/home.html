@@ -68,6 +68,81 @@
     border-radius: 10px;
     padding: 0.7em 2em;
 }
+@media (max-width: 600px) {
+    .card {
+        border-radius: 10px;
+        margin-bottom: 14px;
+    }
+    .card-title {
+        font-size: 1em;
+        gap: 2px;
+    }
+    .add-log-btn {
+        width: 100%;
+        font-size: 1.08em;
+        padding: 0.7em 0;
+    }
+    .card-summary {
+        font-size: 0.95em;
+        flex-direction: column;
+        gap: 0.5em;
+    }
+    .card-text {
+        overflow-x: auto;
+        width: 100vw;
+        margin-left: -4vw;
+        margin-right: -4vw;
+    }
+    table.table-sm {
+        min-width: 420px;
+        width: 100%;
+        font-size: 0.97em;
+    }
+    th, td {
+        padding: 8px 4px;
+        font-size: 0.97em;
+        white-space: nowrap;
+    }
+}
+@media (max-width: 430px) {
+    .card-title { font-size: 0.97em; }
+    .card-summary { font-size: 0.93em; }
+    .card-text { margin-left: -8vw; margin-right: -8vw; }
+    table.table-sm { min-width: 320px; }
+}
+@media (max-width: 400px) {
+    .card-title { font-size: 0.95em; }
+    .card-summary { font-size: 0.91em; }
+    table.table-sm { min-width: 260px; }
+}
+/* Адаптивная таблица: превращаем в список с подписями */
+@media (max-width: 480px) {
+    table.table-sm thead { display: none; }
+    table.table-sm tbody tr {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 8px;
+        background: #fff;
+    }
+    table.table-sm td {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 8px 6px;
+        font-size: 1em;
+        border: none;
+        position: relative;
+    }
+    table.table-sm td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #888;
+        display: block;
+        margin-bottom: 2px;
+        font-size: 0.97em;
+    }
+}
 </style>
 {% endblock stylesheet%}
 
