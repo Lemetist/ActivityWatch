@@ -134,6 +134,7 @@ def foodtracker(request):
                     f = Food_Entry(date=form_sub.cleaned_data['date'], description=form_sub.cleaned_data['description'], calories=form_sub.cleaned_data['calories'], user=request.user)
                     f.save()
                     messages.success(request, "Успешно добавлено: " + form_sub.cleaned_data['description'] + ".", extra_tags='success')
+                    return redirect('app:foodtracker')
             else:
                 messages.error(request, "Ошибка: описание может содержать только буквы, цифры, точки, запятые и скобки!", extra_tags='danger')
         elif request.method == 'POST' and 'sub_btn_2' in request.POST:
@@ -144,6 +145,7 @@ def foodtracker(request):
                 f.date = form_sub.cleaned_data["date"]
                 f.save()
                 messages.success(request, "Успешно добавлено: " + form_sub.cleaned_data['description'] + ".", extra_tags='success')
+                return redirect('app:foodtracker')
         elif request.method == 'POST':
             f = Food_Entry.objects.filter(user=request.user, pk=request.POST['pk']).first()
             Food_Entry.objects.filter(user=request.user, pk=request.POST['pk']).delete()
@@ -151,6 +153,7 @@ def foodtracker(request):
                 messages.success(request, "Успешно удалено: " + f.description + ".", extra_tags='success')
             else:
                 messages.success(request, "Запись уже удалена.", extra_tags='success')
+            return redirect('app:foodtracker')
         # Создание форм
         form = FoodForm()
         form_2 = FoodFormTheSecond(request=request)
@@ -188,21 +191,19 @@ def weightlog(request):
         return redirect('app:login')
     else:
         form = WeightLogForm()
-        context = {
-            'title': 'Весовой журнал',
-            'weight_logs': WeightLog.objects.filter(user=request.user).order_by('-timestamp'),
-            'form': form,
-            'savedWeight': False
-        }
         if request.method == 'POST':
             form = WeightLogForm(request.POST)
             if form.is_valid():
                 w = WeightLog(weight=form.cleaned_data['weight'], user=request.user)
                 w.save()
-                context['savedWeight'] = True
-                return render(request, 'app/weightlog.html', context)
-        else:
-            return render(request, 'app/weightlog.html', context)
+                return redirect('app:weightlog')  # POST-redirect-GET
+        context = {
+            'title': 'Весовой журнал',
+            'weight_logs': WeightLog.objects.filter(user=request.user).order_by('-timestamp'),
+            'form': form,
+            'savedWeight': request.method == 'GET' and request.GET.get('saved', None) is not None
+        }
+        return render(request, 'app/weightlog.html', context)
 
 def login_view(request):
     context = {
