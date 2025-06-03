@@ -5,7 +5,7 @@ import sys
 
 #test
 def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FitTrack.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ActivityWatch.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

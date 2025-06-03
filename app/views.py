@@ -340,7 +340,7 @@ def logout_user(request):
 @login_required
 def export_data_csv(request):
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="fittrack_data.csv"'
+    response['Content-Disposition'] = 'attachment; filename="activitywatch_data.csv"'
     writer = csv.writer(response)
     writer.writerow(['Тип', 'Дата/Время', 'Описание', 'Значение', 'Калории'])
     # Вес
@@ -368,7 +368,7 @@ def export_data_json(request):
         ]
     }
     response = HttpResponse(json.dumps(data, ensure_ascii=False, default=str), content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="fittrack_data.json"'
+    response['Content-Disposition'] = 'attachment; filename="activitywatch_data.json"'
     return response
 
 def error_400(request, exception):

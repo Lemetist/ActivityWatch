@@ -6,7 +6,7 @@ import django
 
 # Настройка Django, если скрипт запущен напрямую
 if not os.environ.get('DJANGO_SETTINGS_MODULE'):
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'FitTrack.settings'
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'ActivityWatch.settings'
     django.setup()
 
 # Add Exercises from json file to database

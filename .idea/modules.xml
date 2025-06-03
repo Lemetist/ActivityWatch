@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FitTrack.iml" filepath="$PROJECT_DIR$/.idea/FitTrack.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ActivityWatch.iml" filepath="$PROJECT_DIR$/.idea/ActivityWatch.iml" />
     </modules>
   </component>
 </project>
