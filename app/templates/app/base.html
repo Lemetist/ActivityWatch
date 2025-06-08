@@ -272,8 +272,7 @@
             }
         }
         /* Затемнение фона при открытом меню */
-        .menu-overlay {
-            display: none;
+        .menu-overlay {        display: none;
         }
         .nav.open ~ .menu-overlay {
             display: block;
@@ -282,6 +281,70 @@
             background: rgba(0,0,0,0.3);
             z-index: 1000;
         }
+        
+        /* Дополнительные стили для мобильной адаптации */
+        @media (max-width: 768px) {
+            .card {
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            .progress {
+                border-radius: 4px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .badge {
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            h3 {
+                font-size: 1.25rem;
+            }
+            
+            .table-responsive {
+                border: none;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            
+            .card-title {
+                font-size: 1.1rem;
+            }
+            
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+        
         {% block style %}{% endblock %}
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
