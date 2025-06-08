@@ -23,6 +23,11 @@ import numpy as np
 from django.contrib.auth.decorators import login_required
 import csv
 from django.templatetags.static import static
+from .models import Goal
+from .forms import GoalForm
+from django.contrib.auth.decorators import login_required
+from django.views.generic import ListView, CreateView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def button_class(active_exercise, button):
     if active_exercise == button:
@@ -389,18 +394,48 @@ def force_400(request):
     return HttpResponseBadRequest("Искусственно вызванная ошибка 400.")
 
 @login_required
+@login_required
 def profile(request):
     user = request.user
-    weight_logs = WeightLog.objects.filter(user=user).order_by('-timestamp')
-    food_entries = Food_Entry.objects.filter(user=user).order_by('-date')
+    weight_logs = WeightLog.objects.filter(user=user).order_by('-timestamp')[:5]  # Показываем только последние 5 записей
+    food_entries = Food_Entry.objects.filter(user=user).order_by('-date')[:5]  # Показываем только последние 5 записей
     exercises = []
     for log in ExerciseLog.objects.filter(user=user):
         exercises.extend(Exercise_App.objects.filter(exercise_log=log))
+    exercises = exercises[:5]  # Показываем только последние 5 упражнений
+    
     context = {
         'title': 'Профиль',
         'user': user,
         'weight_logs': weight_logs,
+        'weight_count': WeightLog.objects.filter(user=user).count(),
         'food_entries': food_entries,
+        'food_count': Food_Entry.objects.filter(user=user).count(),
         'exercises': exercises,
+        'exercise_count': len(exercises),
     }
     return render(request, 'app/profile.html', context)
+
+@login_required
+def goals_list(request):
+    goals = Goal.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'app/goals_list.html', {'goals': goals, 'title': 'Мои цели'})
+
+class GoalCreateView(LoginRequiredMixin, CreateView):
+    model = Goal
+    form_class = GoalForm
+    template_name = 'app/goal_form.html'
+    success_url = '/goals/'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+class GoalUpdateView(LoginRequiredMixin, UpdateView):
+    model = Goal
+    form_class = GoalForm
+    template_name = 'app/goal_form.html'
+    success_url = '/goals/'
+
+    def get_queryset(self):
+        return Goal.objects.filter(user=self.request.user)

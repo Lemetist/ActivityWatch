@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.validators import RegexValidator
-from .models import Food_Entry
+from .models import Food_Entry, Goal
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -48,3 +48,11 @@ class FoodFormTheSecond(forms.Form):
         food_entries = Food_Entry.objects.filter(user=self.request.user).order_by('description').values_list("description", flat=True).distinct()
         # Ensure choices are properly formatted as tuples of (value, label)
         self.fields['description'].choices = [(desc, desc) for desc in food_entries] if food_entries else [('', '-- Select a food --')]
+
+class GoalForm(forms.ModelForm):
+    class Meta:
+        model = Goal
+        fields = ['name', 'goal_type', 'target_value', 'unit', 'due_date']
+        widgets = {
+            'due_date': DateInput(),
+        }
