@@ -79,37 +79,37 @@
     </div>
 </div>
 {% if weight_logs|length > 1 %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('weightChart').getContext('2d');
-    const labels = [{% for w in weight_logs %}'{{ w.timestamp|date:"d.m.Y" }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
-    const data = [{% for w in weight_logs %}{{ w.weight }}{% if not forloop.last %}, {% endif %}{% endfor %}];
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Вес (кг)',
-                data: data,
-                borderColor: '#198754',
-                backgroundColor: 'rgba(25,135,84,0.08)',
-                tension: 0.2,
-                pointRadius: 4,
-                pointBackgroundColor: '#198754',
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: true }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const labels = [{% for w in weight_logs|dictsort:"timestamp" %}'{{ w.timestamp|date:"d.m" }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const data = [{% for w in weight_logs|dictsort:"timestamp" %}{{ w.weight }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Вес (кг)',
+                    data: data,
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25,135,84,0.08)',
+                    tension: 0.2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#198754',
+                    fill: true,
+                }]
             },
-            scales: {
-                y: { beginAtZero: false }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 {% endif %}
 {% endblock body %}
