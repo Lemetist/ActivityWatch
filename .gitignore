@@ -3,17 +3,9 @@ db.sqlite3
 */__pycache__/
 **/__pycache__/
 app/migrations/__pycache__/
-# Default ignored files
-/shelf/
-/workspace.xml
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-# Editor-based HTTP Client requests
-/httpRequests/
-=======
-.vscode/
 app/__pycache__/
+.venv/
+venv/
 # Default ignored files
 /shelf/
 /workspace.xml
