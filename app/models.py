@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
+from django.db.models import Sum
 from django.core.validators import RegexValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Exercise(models.Model):
@@ -67,6 +68,74 @@ class Goal(models.Model):
         """Проверяет, достигнута ли цель на основе current_value и target_value"""
         return self.current_value >= self.target_value
 
+    def save(self, *args, **kwargs):
+        """Переопределяем метод save для автоматического обновления статуса достижения"""
+        # Обновляем статус достижения цели при каждом сохранении
+        self.is_achieved = self.current_value >= self.target_value
+        super().save(*args, **kwargs)
+
+    def update_current_value(self):
+        """Обновляет текущее значение цели на основе данных пользователя"""
+        if self.goal_type == 'weight':
+            # Получаем последнюю запись веса
+            latest_weight = WeightLog.objects.filter(user=self.user).order_by('-timestamp').first()
+            if latest_weight:
+                try:
+                    self.current_value = float(latest_weight.weight)
+                except (ValueError, TypeError):
+                    self.current_value = 0
+        elif self.goal_type == 'workouts':
+            # Подсчитываем количество тренировок за текущий месяц
+            from django.utils import timezone
+            from datetime import datetime, timedelta
+            start_of_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            workouts_count = ExerciseLog.objects.filter(
+                user=self.user,
+                timestamp__gte=start_of_month
+            ).count()
+            self.current_value = workouts_count
+        elif self.goal_type == 'calories':
+            # Подсчитываем калории за сегодня
+            from django.utils import timezone
+            today = timezone.now().date()
+            today_calories = Food_Entry.objects.filter(
+                user=self.user,
+                date=today
+            ).aggregate(total=models.Sum('calories'))['total'] or 0
+            self.current_value = today_calories
+        
+        # Обновляем статус достижения цели
+        self.is_achieved = self.current_value >= self.target_value
+        self.save()
+
     class Meta:
         verbose_name = 'Цель'
         verbose_name_plural = 'Цели'
+
+
+# Сигналы для автоматического обновления целей
+@receiver(post_save, sender='app.WeightLog')
+def update_weight_goals(sender, instance, created, **kwargs):
+    """Обновляем цели типа 'вес' при добавлении новой записи веса"""
+    if created:
+        weight_goals = Goal.objects.filter(user=instance.user, goal_type='weight')
+        for goal in weight_goals:
+            goal.update_current_value()
+
+
+@receiver(post_save, sender='exlog_app.ExerciseLog')
+def update_workout_goals(sender, instance, created, **kwargs):
+    """Обновляем цели типа 'тренировки' при добавлении новой тренировки"""
+    if created:
+        workout_goals = Goal.objects.filter(user=instance.user, goal_type='workouts')
+        for goal in workout_goals:
+            goal.update_current_value()
+
+
+@receiver(post_save, sender='app.Food_Entry')
+def update_calorie_goals(sender, instance, created, **kwargs):
+    """Обновляем цели типа 'калории' при добавлении новой записи питания"""
+    if created:
+        calorie_goals = Goal.objects.filter(user=instance.user, goal_type='calories')
+        for goal in calorie_goals:
+            goal.update_current_value()

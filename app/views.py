@@ -421,6 +421,11 @@ def profile(request):
 @login_required
 def goals_list(request):
     goals = Goal.objects.filter(user=request.user).order_by('-created_at')
+    
+    # Обновляем текущие значения для всех целей
+    for goal in goals:
+        goal.update_current_value()
+    
     return render(request, 'app/goal_list.html', {'goals': goals, 'title': 'Мои цели'})
 
 class GoalCreateView(LoginRequiredMixin, CreateView):
