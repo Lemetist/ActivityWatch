@@ -1,4 +1,4 @@
-import json
+imimport json
 from collections import defaultdict
 
 # Путь к файлу Exercises.json

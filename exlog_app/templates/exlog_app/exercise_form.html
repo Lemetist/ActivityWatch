@@ -1,53 +1,50 @@
 {% extends "exlog_app/base.html" %}
 
 {% block content %}
-<div class="content-section" style="max-width: 480px; margin: 0 auto;">
+<div class="card shadow-sm p-4" style="max-width: 420px; margin: 0 auto; border-radius: 14px; background: #fff;">
     {% with request.resolver_match.url_name as url_name %}
     <form method="POST" novalidate>
         {% csrf_token %}
-        <fieldset class="form-group">
-            <legend class="border-bottom mb-4" style="font-size:1.4em;font-weight:600;">
+        <fieldset class="form-group border-0 p-0">
+            <legend class="mb-3" style="font-size:1.25em;font-weight:600; border: none; padding: 0; background: none;">
                 {% if url_name == 'exlog-add-exercise'%}
                     <i class="fa fa-dumbbell"></i> Новое упражнение
                 {% else %}
                     <i class="fa fa-edit"></i> Обновить упражнение
                 {% endif %}
             </legend>
-            <div class="form-group mb-3">
-                <label for="id_exercise_ref"><i class="fa fa-font"></i> Упражнение</label>
+            <div class="mb-3">
+                <label for="id_exercise_ref" class="form-label"><i class="fa fa-font"></i> Упражнение</label>
                 {{ form.exercise_ref }}
                 {% for error in form.exercise_ref.errors %}
-                    <div class="invalid-feedback">{{ error }}</div>
+                    <div class="invalid-feedback d-block">{{ error }}</div>
                 {% endfor %}
             </div>
-            <div class="form-row">
-                <div class="form-group col-md-4 mb-3">
-                    <label for="id_num_sets"><i class="fa fa-layer-group"></i> Подходы</label>
+            <div class="row g-2 text-center">
+                <div class="col-4">
+                    <label for="id_num_sets" class="form-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;"><i class="fa fa-layer-group"></i> Подходы</label>
                     <input type="number" name="num_sets" min="1" max="99" class="form-control {% if form.num_sets.errors %}is-invalid{% endif %}" id="id_num_sets" placeholder="3" value="{{ form.num_sets.value|default_if_none:'' }}">
-                    <small class="form-text text-muted">Сколько подходов?</small>
                     {% for error in form.num_sets.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
+                        <div class="invalid-feedback d-block">{{ error }}</div>
                     {% endfor %}
                 </div>
-                <div class="form-group col-md-4 mb-3">
-                    <label for="id_num_reps"><i class="fa fa-redo"></i> Повторения</label>
+                <div class="col-4">
+                    <label for="id_num_reps" class="form-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;"><i class="fa fa-redo"></i> Повторения</label>
                     <input type="number" name="num_reps" min="1" max="99" class="form-control {% if form.num_reps.errors %}is-invalid{% endif %}" id="id_num_reps" placeholder="12" value="{{ form.num_reps.value|default_if_none:'' }}">
-                    <small class="form-text text-muted">Сколько раз в подходе?</small>
                     {% for error in form.num_reps.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
+                        <div class="invalid-feedback d-block">{{ error }}</div>
                     {% endfor %}
                 </div>
-                <div class="form-group col-md-4 mb-3">
-                    <label for="id_exercise_weight"><i class="fa fa-weight-hanging"></i> Вес (кг)</label>
+                <div class="col-4">
+                    <label for="id_exercise_weight" class="form-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;"><i class="fa fa-weight-hanging"></i> Вес (кг)</label>
                     <input type="number" name="exercise_weight" min="0" max="999" class="form-control {% if form.exercise_weight.errors %}is-invalid{% endif %}" id="id_exercise_weight" placeholder="0" value="{{ form.exercise_weight.value|default_if_none:'' }}">
-                    <small class="form-text text-muted">Можно оставить 0</small>
                     {% for error in form.exercise_weight.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
+                        <div class="invalid-feedback d-block">{{ error }}</div>
                     {% endfor %}
                 </div>
             </div>
         </fieldset>
-        <button class="btn btn-success btn-lg btn-block mt-3" type="submit" style="font-size:1.15em;">
+        <button class="btn btn-success w-100 mt-4" type="submit" style="font-size:1.08em; font-weight:600;">
             {% if url_name == 'exlog-add-exercise'%}
                 <i class="fa fa-plus"></i> Добавить упражнение
             {% else %}

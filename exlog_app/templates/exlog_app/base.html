@@ -4,65 +4,45 @@
 
 {% block body %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'exlog_app/base.css' %}">
 {% block stylesheets %}{% endblock stylesheets %}
-<style>
-  @media (max-width: 991px) {
-    .exlog-lists, .col-md-8.exlog-lists { width: 100%; max-width: 100%; }
-    .col-md-4 { width: 100%; max-width: 100%; margin-top: 18px; }
-    .card.content-section { margin-bottom: 18px; }
-  }
-  @media (max-width: 700px) {
-    .header { font-size: 1.3em; }
-    .exlog-lists, .col-md-8.exlog-lists { padding: 0; }
-    .col-md-4 { padding: 0; }
-    .card.content-section { padding: 10px 4px; }
-    .container { padding: 0 2vw; }
-  }
-  .card.content-section .btn { width: 100%; margin-bottom: 8px; }
-  .alert { font-size: 0.97em; }
-</style>
 
 <main role="main" class="container">
-  <h1 class="header pb-0 mb-0">Журнал Упражнений</h1>
-  <p class="text-muted">Записывайте и просматривайте свои тренировки.</p>
-  <hr>
-  <div class="row">
-
-    <div class="col-md-8 exlog-lists">
-      {% block content %}{% endblock content%}
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-md-4">
-      <div class="row">
-        <div class="col-md-12">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} fade" role="alert">
-            {{ message }}
+  <div class="card shadow-sm p-4 mb-4" style="border-radius: 18px; background: #f8fafd;">
+    <h1 class="header pb-0 mb-0" style="font-weight: 700; font-size: 2em; letter-spacing: 0.5px; color: #198754;">Журнал Упражнений</h1>
+    <p class="text-muted mb-2" style="font-size: 1.13em;">Записывайте и просматривайте свои тренировки.</p>
+    <hr style="margin: 1.2em 0;">
+    <div class="row">
+      <div class="col-md-8 exlog-lists">
+        {% block content %}{% endblock content%}
+      </div>
+      <!-- Sidebar -->
+      <div class="col-md-4">
+        <div class="row">
+          <div class="col-md-12">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} fade" role="alert">
+              {{ message }}
+            </div>
+          {% endfor %}
           </div>
-        {% endfor %}
+        </div>
+        <div class="card content-section shadow-sm" style="border-radius: 14px; background: #fff;">
+            {% with request.resolver_match.url_name as url_name %}
+            <div class="sidebar-btns">
+                <a href="/exlog/">
+                  <button class="btn {% if url_name == 'exlog_home' %} btn-primary {% else %} btn-outline-primary {% endif %} btn-block mb-1" style="font-weight:600;"><i class="fa fa-list"></i> Просмотреть Все Тренировки</button>
+                </a>
+                <a href="/exlog/log/new/">
+                  <button class="btn {% if url_name == 'exlog-create' %} btn-success {% else %} btn-outline-success {% endif %} btn-block mb-1" style="font-weight:600;"><i class="fa fa-plus"></i> Добавить Новую Тренировку</button>
+                </a>
+               <a href="/exercises/">
+                  <button class="btn btn-outline-secondary btn-block mb-1" style="font-weight:600;"><i class="fa fa-cogs"></i> Создать Тренировку</button>
+                </a>
+            </div>
+           {% endwith %}
         </div>
       </div>
-      <div class="card content-section">
-          <!-- ListView for all workout logs under the current logged in user-->
-          {% with request.resolver_match.url_name as url_name %}
-              <a href="/exlog/">
-                <Button class="btn {% if url_name == 'exlog_home' %} btn-primary {% else %} btn-outline-primary {% endif %} btn-block mb-1"><i class="fa fa-list"></i> Просмотреть Все Тренировки</Button>
-              </a>
-              <!-- CreateView to add new ExerciseLog object into db-->
-              <a href="/exlog/log/new/">
-                <Button class="btn {% if url_name == 'exlog-create' %} btn-success {% else %} btn-outline-success {% endif %} btn-block mb-1"><i class="fa fa-plus"></i> Добавить Новую Тренировку</Button>
-              </a>
-
-             <a href="/exercises/">
-                <Button class="btn btn-outline-secondary btn-block mb-1"><i class="fa fa-cogs"></i> Создать Тренировку</Button>
-              </a>
-         {% endwith %}
-
-      </div>
     </div>
-
   </div>
 </main>
-{% endblock body %}
+{% endblock body %} 

@@ -217,12 +217,70 @@
             .nav-btn, .nav > a:not(.logo-div) {
                 display: none;
             }
-            .nav.open .nav-btn, .nav.open > a:not(.logo-div) {
+            .nav.open {
+                position: fixed;
+                top: 0;
+                right: 0;
+                left: auto;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(255,255,255,0.98);
+                overflow-y: auto;
+                box-shadow: 0 0 20px rgba(0,0,0,0.15);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                z-index: 1002;
+            }
+            .nav.open .logo-div {
+                justify-content: center;
+                display: flex;
+                width: 100%;
+                margin-bottom: 24px;
+            }
+            .nav.open .nav-btn {
                 display: block;
+                float: none !important;
+                margin: 18px auto;
+                width: 90vw;
+                max-width: 400px;
+                text-align: center;
+                align-self: center;
+                box-sizing: border-box;
             }
-            .nav {
-                position: relative;
+            .nav.open a.nav-btn {
+                width: 90vw;
+                max-width: 400px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 12px 0;
+                float: none !important;
+                align-self: center;
+                box-sizing: border-box;
             }
+            .nav.open button.btn {
+                width: 100%;
+                font-size: 1.2em;
+                word-break: break-word;
+                white-space: normal;
+                text-align: center;
+                padding-left: 0;
+                padding-right: 0;
+                box-sizing: border-box;
+            }
+        }
+        /* Затемнение фона при открытом меню */
+        .menu-overlay {
+            display: none;
+        }
+        .nav.open ~ .menu-overlay {
+            display: block;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.3);
+            z-index: 1000;
         }
         {% block style %}{% endblock %}
     </style>
@@ -232,9 +290,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             var burger = document.getElementById('burger');
             var nav = document.querySelector('.nav');
+            var overlay = document.createElement('div');
+            overlay.className = 'menu-overlay';
+            document.body.appendChild(overlay);
             if (burger && nav) {
                 burger.addEventListener('click', function() {
                     nav.classList.toggle('open');
+                    document.body.classList.toggle('menu-open', nav.classList.contains('open'));
+                    overlay.style.display = nav.classList.contains('open') ? 'block' : 'none';
+                });
+                overlay.addEventListener('click', function() {
+                    nav.classList.remove('open');
+                    document.body.classList.remove('menu-open');
+                    overlay.style.display = 'none';
                 });
             }
         });
@@ -242,71 +310,69 @@
 </head>
 <body class="body">
     <div class="main">
-        <div class="nav">
-            <button class="burger" id="burger" aria-label="Открыть меню"><span></span></button>
+        <nav class="nav" aria-label="Главное меню">
+            <button class="burger" id="burger" aria-label="Открыть меню" tabindex="0"><span></span></button>
             <div class="logo-div">
-                <img src="{% static 'logo.png' %}" class="logo-header">
+                <a href="{% url 'app:home' %}"><img src="{% static 'logo.png' %}" class="logo-header" alt="Логотип"></a>
             </div>
             {% with request.resolver_match.url_name as url_name %}
             {% if user.is_authenticated %}
                 <a href="{% url 'app:profile' %}" class="nav-btn pt-2" style="text-decoration:none; color:inherit;">
                     {{ user.username }}
                 </a>
-                <a href={% url 'app:logout' %}>
-                    <Button class="btn btn-outline-danger nav-btn">Выйти</Button>
+                <a href="{% url 'app:logout' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-danger w-100">Выйти</button>
                 </a>
-                <a href={% url 'app:results' %}>
-                    <Button class="btn btn-outline-secondary nav-btn {% if url_name == 'results' %} active {% endif %}" >Результаты</Button>
+                <a href="{% url 'app:results' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'results' %} active{% endif %}">Результаты</button>
                 </a>
-                <a href={% url 'app:foodtracker' %}>
-                    <Button class="btn btn-outline-secondary nav-btn {% if url_name == 'foodtracker' %} active {% endif %}">Трекер питания</Button>
+                <a href="{% url 'app:foodtracker' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'foodtracker' %} active{% endif %}">Трекер питания</button>
                 </a>
-                <a href={% url 'app:weightlog' %}>
-                    <Button class="btn btn-outline-secondary nav-btn {% if url_name == 'weightlog' %} active {% endif %}">Весовой журнал</Button>
+                <a href="{% url 'app:weightlog' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'weightlog' %} active{% endif %}">Весовой журнал</button>
                 </a>
-                <a href={% url 'exlog_home' %}>
-                    <Button class="btn btn-outline-secondary nav-btn
-                    {%  if url_name == 'exlog_home' or url_name == 'exlog-detail' or url_name == 'exlog-create' or url_name == 'exlog-update' or url_name == 'exlog-delete' or url_name == 'exlog-add-exercise' or url_name == 'exlog-update-exercise'  or url_name == 'exlog-delete-exercise'%}
-                        active
-                    {% endif %}">Журнал тренировок</Button>
+                <a href="{% url 'exlog_home' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'exlog_home' or url_name == 'exlog-detail' or url_name == 'exlog-create' or url_name == 'exlog-update' or url_name == 'exlog-delete' or url_name == 'exlog-add-exercise' or url_name == 'exlog-update-exercise' or url_name == 'exlog-delete-exercise' %} active{% endif %}">Журнал тренировок</button>
                 </a>
-                <a href={% url 'app:exercises' %}>
-                    <Button class="btn btn-outline-secondary nav-btn {% if url_name == 'exercises' %} active {% endif %}">Упражнения</Button>
+                <a href="{% url 'app:exercises' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'exercises' %} active{% endif %}">Упражнения</button>
                 </a>
             {% else %}
-                <a href={% url 'app:signup' %}>
-                    <Button class="btn btn-outline-secondary nav-btn">Регистрация</Button>
+                <a href="{% url 'app:signup' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100">Регистрация</button>
                 </a>
-                <a href={% url 'app:login' %}>
-                    <Button class="btn btn-outline-secondary nav-btn">Войти</Button>
+                <a href="{% url 'app:login' %}" class="nav-btn">
+                    <button type="button" class="btn btn-outline-secondary w-100">Войти</button>
                 </a>
             {% endif %}
             {% endwith %}
-        <a href={% url 'app:home' %}>
-            <Button class="btn btn-outline-secondary nav-btn {% if url_name == 'home' %} active {% endif %}">Главная</Button>
-        </a>
-    </div>
-    <div class="container" style="min-height:600px;">
-        {% if breadcrumbs %}
-        <nav aria-label="breadcrumb" class="mt-2 mb-3">
-            <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
-                {% for crumb in breadcrumbs %}
-                    {% if not forloop.last %}
-                        <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.title }}</a></li>
-                    {% else %}
-                        <li class="breadcrumb-item active" aria-current="page">{{ crumb.title }}</li>
-                    {% endif %}
-                {% endfor %}
-            </ol>
+            <a href="{% url 'app:home' %}" class="nav-btn">
+                <button type="button" class="btn btn-outline-secondary w-100{% if url_name == 'home' %} active{% endif %}">Главная</button>
+            </a>
         </nav>
-        {% endif %}
-        {% block body %}{% endblock %}
+        <div class="container" style="min-height:600px;">
+            {% if breadcrumbs %}
+            <nav aria-label="breadcrumb" class="mt-2 mb-3">
+                <ol class="breadcrumb bg-white px-3 py-2 rounded shadow-sm">
+                    {% for crumb in breadcrumbs %}
+                        {% if not forloop.last %}
+                            <li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.title }}</a></li>
+                        {% else %}
+                            <li class="breadcrumb-item active" aria-current="page">{{ crumb.title }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+            {% endif %}
+            {% block body %}{% endblock %}
+        </div>
+        <footer class="footer">
+            <a href="{% url 'app:home' %}">
+                <img src="{% static 'logo2.png' %}" class="logo-footer" alt="Логотип подвала">
+            </a>
+            <p style="color: white;"><i> © 2025 Active Life, Inc. Все права защищены.</i></p>
+        </footer>
     </div>
-    <footer class="footer">
-        <a href={% url 'app:home' %}>
-            <img src="{% static 'logo2.png' %}" class="logo-footer">
-        </a>
-        <p style="color: white;"><i> © 2025 Active Life, Inc. Все права защищены.</i></p>
-    </footer>
 </body>
 </html>

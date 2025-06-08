@@ -59,11 +59,13 @@
                     <span class="input-group-text">
                         <img src="{% static 'tick.png' %}" class="img">
                     </span>
-                </div>
-                {# <input class="form-control" placeholder="Confirm Password" type="password"> #}
+                </div>                {# <input class="form-control" placeholder="Confirm Password" type="password"> #}
                 {{ form.password2 }}
             </div>
             <Button class="btn btn-secondary" type="submit">Зарегистрироваться</Button>
+            <div class="text-center mt-3">
+                <p>Уже есть аккаунт? <a href="{% url 'app:login' %}" class="btn btn-outline-primary">Войти</a></p>
+            </div>
         </form>
     </div>
 {% endblock body %}

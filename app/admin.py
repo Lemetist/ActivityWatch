@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Food_Entry, Exercise, WeightLog
+from .models import Food_Entry, Exercise, WeightLog, Goal
 import json
 
 # Путь к файлу Exercises.json
@@ -56,3 +56,4 @@ class ExerciseAdmin(admin.ModelAdmin):
 admin.site.register(Exercise, ExerciseAdmin)
 admin.site.register(WeightLog)
 admin.site.register(Food_Entry)
+admin.site.register(Goal)

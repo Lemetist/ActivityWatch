@@ -1,0 +1,65 @@
+{% extends "app/base.html" %}
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{% if form.instance.pk %}Редактировать цель{% else %}Добавить новую цель{% endif %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.goal_type.id_for_label }}">{{ form.goal_type.label }}</label>
+                            {{ form.goal_type }}
+                            {% if form.goal_type.errors %}
+                                <div class="text-danger">{{ form.goal_type.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.target_value.id_for_label }}">{{ form.target_value.label }}</label>
+                            {{ form.target_value }}
+                            {% if form.target_value.errors %}
+                                <div class="text-danger">{{ form.target_value.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.unit.id_for_label }}">{{ form.unit.label }}</label>
+                            {{ form.unit }}
+                            {% if form.unit.errors %}
+                                <div class="text-danger">{{ form.unit.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.due_date.id_for_label }}">{{ form.due_date.label }}</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                                <div class="text-danger">{{ form.due_date.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group d-flex justify-content-between">
+                            <a href="{% url 'app:goals_list' %}" class="btn btn-secondary">Отмена</a>
+                            <button type="submit" class="btn btn-success">
+                                {% if form.instance.pk %}Сохранить изменения{% else %}Создать цель{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

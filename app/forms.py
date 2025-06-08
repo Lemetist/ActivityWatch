@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.validators import RegexValidator
-from .models import Food_Entry
+from .models import Food_Entry, Goal
 
 
 class UserRegistrationForm(UserCreationForm):
@@ -35,7 +35,7 @@ class DateInput(forms.DateInput):
 
 class FoodForm(forms.Form):
     date = forms.DateField(widget=DateInput, initial=timezone.now) #^[a-zA-Z0-9]([\w .]*[a-zA-Z0-9])+$
-    description = forms.CharField(label="Description", max_length=31, validators=[RegexValidator('^[\w .,()+-]+$', message='Description must be alphanumeric', code='invalid_desc')])
+    description = forms.CharField(label="Description", max_length=31, validators=[RegexValidator(r'^[\w .,()+-]+$', message='Description must be alphanumeric', code='invalid_desc')])
     calories = forms.IntegerField(label="Calories")
 
 class FoodFormTheSecond(forms.Form):
@@ -48,3 +48,22 @@ class FoodFormTheSecond(forms.Form):
         food_entries = Food_Entry.objects.filter(user=self.request.user).order_by('description').values_list("description", flat=True).distinct()
         # Ensure choices are properly formatted as tuples of (value, label)
         self.fields['description'].choices = [(desc, desc) for desc in food_entries] if food_entries else [('', '-- Select a food --')]
+
+class GoalForm(forms.ModelForm):
+    class Meta:
+        model = Goal
+        fields = ['name', 'goal_type', 'target_value', 'unit', 'due_date']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название цели'}),
+            'goal_type': forms.Select(attrs={'class': 'form-control'}),
+            'target_value': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Целевое значение'}),
+            'unit': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Единица измерения'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+        labels = {
+            'name': 'Название цели',
+            'goal_type': 'Тип цели',
+            'target_value': 'Целевое значение',
+            'unit': 'Единица измерения',
+            'due_date': 'Желаемая дата достижения',
+        }

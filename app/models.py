@@ -42,3 +42,31 @@ class Food_Entry(models.Model):
 
     def __str__(self):
         return self.description
+
+class Goal(models.Model):
+    GOAL_TYPE_CHOICES = [
+        ('weight', 'Вес'),
+        ('workouts', 'Тренировки'),
+        ('calories', 'Калории'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, verbose_name='Название цели')
+    goal_type = models.CharField(max_length=20, choices=GOAL_TYPE_CHOICES, default='weight', verbose_name='Тип цели')
+    target_value = models.FloatField(verbose_name='Целевое значение')
+    current_value = models.FloatField(default=0, verbose_name='Текущее значение')
+    unit = models.CharField(max_length=20, default='', verbose_name='Единица измерения')
+    created_at = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True, verbose_name='Желаемая дата достижения')
+    is_achieved = models.BooleanField(default=False, verbose_name='Достигнута')
+
+    def __str__(self):
+        return f"{self.user.username}: {self.name} ({self.goal_type})"
+
+    @property
+    def is_goal_achieved(self):
+        """Проверяет, достигнута ли цель на основе current_value и target_value"""
+        return self.current_value >= self.target_value
+
+    class Meta:
+        verbose_name = 'Цель'
+        verbose_name_plural = 'Цели'

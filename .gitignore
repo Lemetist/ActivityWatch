@@ -1,26 +1,59 @@
+# IDE files
 .vscode/
+.vscode-server/
+
+# Database
 db.sqlite3
+
+# Python cache
 */__pycache__/
 **/__pycache__/
 app/migrations/__pycache__/
+
+# Database migrations (exclude generated migrations, keep only __init__.py)
+app/migrations/0*.py
+exlog_app/migrations/0*.py
+
+# System and shell files
+.psql_history
+.ssh/
+.venv/
+.wget-hsts
+.zshrc
+.bashrc
+.bash_history
+.gitconfig
+.lesshst
+.local/
+.Xauthority
+.cache/
+.config/
+.docker/
+.dotnet/
+.profile
+
 # Default ignored files
 /shelf/
 /workspace.xml
+
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
 # Editor-based HTTP Client requests
 /httpRequests/
-=======
-.vscode/
-app/__pycache__/
-# Default ignored files
-/shelf/
-/workspace.xml
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-# Editor-based HTTP Client requests
-/httpRequests/
+
 # Local environment variables
 .env
+
+# Media files (uploaded content)
+media/
+
+# Static files (collected)
+staticfiles/
+
+# Logs
+*.log
+
+# Docker volumes
+certbot/

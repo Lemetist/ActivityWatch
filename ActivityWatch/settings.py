@@ -127,18 +127,44 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/app/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app/static'), ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/activitywatch/staticfiles'
 
 
 # Media files (uploads)
 # https://docs.djangoproject.com/en/5.2/topics/files/
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/var/www/activitywatch/media'
 
 
 LOGIN_REDIRECT_URL = 'app:home'
 LOGOUT_REDIRECT_URL = 'app:home'
-LOGIN_URL = 'login'
+LOGIN_URL = 'app:login'
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://activitywatch.tech',
+    'http://localhost',
+    'http://127.0.0.1',
+]
+
+# Session settings
+SESSION_COOKIE_SECURE = False  # Для разработки, в продакшене True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 86400  # 24 часа
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF settings
+CSRF_COOKIE_SECURE = False  # Для разработки, в продакшене True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+
+
+
+
+
+
